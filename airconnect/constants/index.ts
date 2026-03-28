@@ -1,0 +1,75 @@
+export const COLORS = {
+  primary: '#0A84FF',
+  primaryDark: '#0066CC',
+  accent: '#FF6B35',
+  accentLight: '#FF8C5A',
+  crew: '#00C9A7',
+  background: '#F8F9FA',
+  card: '#FFFFFF',
+  border: '#E5E7EB',
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  textMuted: '#9CA3AF',
+  verified: '#00C9A7',
+  pending: '#F59E0B',
+  rejected: '#EF4444',
+  darkBg: '#0F1117',
+  darkCard: '#1C1E26',
+  darkBorder: '#2D3045',
+} as const;
+
+export const AIRLINES = [
+  'American Airlines',
+  'Delta Air Lines',
+  'United Airlines',
+  'Southwest Airlines',
+  'Alaska Airlines',
+  'JetBlue Airways',
+  'Spirit Airlines',
+  'Frontier Airlines',
+  'Hawaiian Airlines',
+  'Sun Country Airlines',
+  'Air Canada',
+  'WestJet',
+  'British Airways',
+  'Lufthansa',
+  'Air France',
+  'KLM',
+  'Emirates',
+  'Qatar Airways',
+  'Singapore Airlines',
+  'Cathay Pacific',
+  'Other',
+] as const;
+
+export const POSITIONS = [
+  'Flight Attendant',
+  'Pilot / First Officer',
+  'Captain',
+  'Gate Agent',
+  'Ramp Agent',
+  'Baggage Handler',
+  'Customer Service',
+  'Operations',
+  'Maintenance / MX',
+  'Corporate / Admin',
+  'Other',
+] as const;
+
+export const TIP_CATEGORIES = [
+  { value: 'food', label: 'Food & Dining', emoji: '🍽️' },
+  { value: 'transport', label: 'Transportation', emoji: '🚇' },
+  { value: 'safety', label: 'Safety Tips', emoji: '🛡️' },
+  { value: 'activities', label: 'Activities', emoji: '🎯' },
+  { value: 'hotel', label: 'Crew Hotels', emoji: '🏨' },
+  { value: 'routes', label: 'Flight Routes', emoji: '✈️' },
+] as const;
+
+export const BADGE_DEFINITIONS = {
+  globe_trotter: { name: 'Globe Trotter', description: 'Visited 10+ countries', emoji: '🌍' },
+  continental_explorer: { name: 'Continental Explorer', description: 'Visited all continents', emoji: '🗺️' },
+  layover_legend: { name: 'Layover Legend', description: '50+ check-ins', emoji: '⏰' },
+  local_expert: { name: 'Local Expert', description: '25+ tips with 100+ upvotes', emoji: '⭐' },
+  social_butterfly: { name: 'Social Butterfly', description: 'Met up with 10+ users', emoji: '🦋' },
+  route_master: { name: 'Route Master', description: 'Shared 20+ flight routes', emoji: '✈️' },
+} as const;
