@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "AirConnect",
+    "slug": "airconnect",
+    "version": "1.0.0",
+    "scheme": "airconnect",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A84FF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.airconnect.app"
+    },
+    "android": {
+      "package": "com.airconnect.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0A84FF",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "AirConnect needs your location to show nearby crew members."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "AirConnect uses your photos for profile pictures and posts."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
