@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import { COLORS } from '@/constants';
 
 function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
@@ -68,6 +68,14 @@ export default function TabsLayout() {
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon emoji="💬" label="Chat" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ai"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="✨" label="CrewAI" focused={focused} />
           ),
         }}
       />
