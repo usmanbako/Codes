@@ -487,31 +487,42 @@ HTML = """<!doctype html>
 </div>
 
 <script>
-// Ability classification heuristics for RDM (extend as needed)
 const GCD_ABILITIES = new Set([
+  // ── Red Mage ──
   "Veraero III","Verthunder III","Veraero II","Verthunder II","Veraero","Verthunder",
   "Jolt III","Jolt II","Jolt","Impact","Scatter","Grand Impact",
   "Verstone","Verfire","Verholy","Verflare","Scorch","Resolution","Vercure","Verraise",
   "Enchanted Riposte","Enchanted Zwerchhau","Enchanted Redoublement",
   "Enchanted Moulinet","Enchanted Moulinet Deux","Enchanted Moulinet Trois",
   "Enchanted Reprise",
+  // ── Black Mage ──
+  "Fire","Fire II","Fire III","Fire IV","Flare","Flare Star",
+  "Blizzard","Blizzard II","Blizzard III","Blizzard IV","Freeze",
+  "High Fire II","High Blizzard II",
+  "Xenoglossy","Foul","Paradox","Scathe",
+  "Thunder","Thunder II","Thunder III","Thunder IV",
+  "High Thunder","High Thunder II",
 ]);
 
-// oGCDs: weaponskills/abilities off the global cooldown, plus buffs/items.
 const OGCD_ABILITIES = new Set([
-  "Embolden","Manafication","Acceleration","Swiftcast","Addle","Magick Barrier",
-  "Lucid Dreaming","Sprint",
-  "Vice of Thorns","Prefulgence",
+  // ── Shared ──
+  "Swiftcast","Addle","Lucid Dreaming","Sprint","Surecast",
   "Grade 4 Gemdraught of Intelligence [HQ]",
   "Grade 8 Tincture of Intelligence",
+  // ── Red Mage ──
+  "Embolden","Manafication","Acceleration","Magick Barrier",
+  "Vice of Thorns","Prefulgence",
   "Corps-a-Corps","Engagement","Fleche","Contre Sixte",
+  // ── Black Mage ──
+  "Amplifier","Ley Lines","Between the Lines","Retrace",
+  "Triplecast","Manafont","Transpose",
 ]);
 
 function classify(name) {
   if (GCD_ABILITIES.has(name)) return "gcd";
   if (OGCD_ABILITIES.has(name)) return "ogcd";
-  // Fallback: names with "Enchanted" or known GCD patterns
-  if (/enchanted|verstone|verfire|verholy|verflare|veraero|verthunder|scorch|resolution|jolt|impact|vercure/i.test(name)) return "gcd";
+  // Fallback regex covering known GCD patterns
+  if (/enchanted|verstone|verfire|verholy|verflare|veraero|verthunder|scorch|resolution|jolt|impact|vercure|thunder|blizzard|fire\b/i.test(name)) return "gcd";
   return "ogcd";
 }
 
