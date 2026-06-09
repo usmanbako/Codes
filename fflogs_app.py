@@ -66,22 +66,21 @@ def fetch_master(token, report_code):
     d = gql(token, q, {"code": report_code})
     md = d["reportData"]["report"]["masterData"]
     actors = {a["name"].lower(): a["id"] for a in md["actors"]}
+    actors_by_id = {a["id"]: a["name"] for a in md["actors"]}
     abilities = {a["gameID"]: a["name"] for a in md["abilities"]}
-    return actors, abilities
+    return actors, actors_by_id, abilities
 
 
-def fetch_fights(token, report_code, encounter_id=None):
+def fetch_fights(token, report_code, kills_only=True):
+    kill_type = "Kills" if kills_only else "All"
     q = """
-    query($code:String!){
+    query($code:String!,$killType:KillType!){
       reportData { report(code:$code){
-        fights(killType:Kills){ id name encounterID startTime endTime }
+        fights(killType:$killType){ id name encounterID startTime endTime }
       }}
     }"""
-    d = gql(token, q, {"code": report_code})
-    fights = d["reportData"]["report"]["fights"]
-    if encounter_id:
-        fights = [f for f in fights if f["encounterID"] == encounter_id]
-    return fights
+    d = gql(token, q, {"code": report_code, "killType": kill_type})
+    return d["reportData"]["report"]["fights"]
 
 
 def fetch_character_reports(token, name, server, region, zone_id=None, boss_id=None):
@@ -121,23 +120,28 @@ def parse_fflogs_url(url):
     """
     Accepts:
       - Character URL: fflogs.com/character/{region}/{server}/{name}[?zone=X&boss=Y]
-      - Report URL:    fflogs.com/reports/{code}[#fight=N]
+      - Report URL:    fflogs.com/reports/{code}[?fight=N&source=M  |  #fight=N]
     Returns dict with keys: type ('character'|'report'), and relevant fields.
     """
     parsed = urlparse(url)
     path = parsed.path.rstrip("/")
     qs = parse_qs(parsed.query)
 
-    # Report URL
+    def _int_from(key, *sources):
+        for src in sources:
+            m = re.search(rf"{key}=(\d+)", src or "")
+            if m:
+                return int(m.group(1))
+        return None
+
+    # Report URL — fight/source may be in the query string OR the #fragment
     m = re.match(r"^/reports/([A-Za-z0-9]+)$", path)
     if m:
         code = m.group(1)
-        fight_id = None
-        if parsed.fragment:
-            fm = re.search(r"fight=(\d+)", parsed.fragment)
-            if fm:
-                fight_id = int(fm.group(1))
-        return {"type": "report", "code": code, "fight_id": fight_id}
+        fight_id = _int_from("fight", parsed.query, parsed.fragment)
+        source_id = _int_from("source", parsed.query, parsed.fragment)
+        return {"type": "report", "code": code,
+                "fight_id": fight_id, "source_id": source_id}
 
     # Character URL
     m = re.match(r"^/character/([^/]+)/([^/]+)/(.+)$", path)
@@ -177,23 +181,33 @@ def api_rotation():
         else:  # report
             report_code = parsed["code"]
             fight_id = parsed.get("fight_id")
-            fights = fetch_fights(token, report_code)
+            # Include wipes so a specifically-linked fight always resolves.
+            fights = fetch_fights(token, report_code, kills_only=fight_id is None)
             if not fights:
-                return jsonify(error="No kill fights found in this report."), 404
+                return jsonify(error="No fights found in this report."), 404
             if fight_id:
-                fight = next((f for f in fights if f["id"] == fight_id), fights[0])
+                fight = next((f for f in fights if f["id"] == fight_id), None)
+                if fight is None:
+                    return jsonify(error=f"Fight {fight_id} not found in this report."), 404
             else:
                 fight = fights[0]
-            if not player_name:
-                return jsonify(error="Paste a character URL, or add ?player=Name for report URLs."), 400
 
-        actors, abilities = fetch_master(token, report_code)
+        actors, actors_by_id, abilities = fetch_master(token, report_code)
 
-        lookup = player_name.lower()
-        source_id = actors.get(lookup)
-        if source_id is None:
-            available = ", ".join(actors.keys())
-            return jsonify(error=f"Player '{player_name}' not in report. Players: {available}"), 404
+        # Resolve the player: explicit name > ?source= from URL > character name.
+        source_id = None
+        url_source = parsed.get("source_id") if parsed["type"] == "report" else None
+        if player_name:
+            source_id = actors.get(player_name.lower())
+            if source_id is None:
+                available = ", ".join(sorted(actors_by_id.values()))
+                return jsonify(error=f"Player '{player_name}' not in report. Players: {available}"), 404
+        elif url_source is not None:
+            source_id = url_source
+            player_name = actors_by_id.get(url_source, f"Source {url_source}")
+        else:
+            available = ", ".join(sorted(actors_by_id.values()))
+            return jsonify(error=f"Add a player. Players in this report: {available}"), 400
 
         casts = fetch_casts(token, report_code, fight["id"], source_id)
         fight_start = fight["startTime"]
