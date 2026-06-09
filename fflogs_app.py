@@ -155,11 +155,13 @@ def parse_fflogs_url(url):
 
 @app.post("/api/rotation")
 def api_rotation():
-    body = request.get_json(force=True)
-    url = (body.get("url") or "").strip()
-    player_name = (body.get("player") or "").strip()  # optional override
-
     try:
+        body = request.get_json(force=True, silent=True) or {}
+        url = (body.get("url") or "").strip()
+        player_name = (body.get("player") or "").strip()  # optional override
+        if not url:
+            return jsonify(error="No URL provided."), 400
+
         parsed = parse_fflogs_url(url)
         token = get_token()
 
@@ -478,13 +480,14 @@ const GCD_ABILITIES = new Set([
   "Verstone","Verfire","Verholy","Verflare","Scorch","Resolution","Vercure","Verraise",
   "Enchanted Riposte","Enchanted Zwerchhau","Enchanted Redoublement",
   "Enchanted Moulinet","Enchanted Moulinet Deux","Enchanted Moulinet Trois",
-  "Enchanted Reprise","Vice of Thorns","Prefulgence",
-  // Generic catch-all GCDs by keyword
+  "Enchanted Reprise",
 ]);
 
-const BUFF_ABILITIES = new Set([
+// oGCDs: weaponskills/abilities off the global cooldown, plus buffs/items.
+const OGCD_ABILITIES = new Set([
   "Embolden","Manafication","Acceleration","Swiftcast","Addle","Magick Barrier",
-  "Lucid Dreaming","Sprint","Vercure",
+  "Lucid Dreaming","Sprint",
+  "Vice of Thorns","Prefulgence",
   "Grade 4 Gemdraught of Intelligence [HQ]",
   "Grade 8 Tincture of Intelligence",
   "Corps-a-Corps","Engagement","Fleche","Contre Sixte",
@@ -492,9 +495,9 @@ const BUFF_ABILITIES = new Set([
 
 function classify(name) {
   if (GCD_ABILITIES.has(name)) return "gcd";
-  if (BUFF_ABILITIES.has(name)) return "ogcd";
+  if (OGCD_ABILITIES.has(name)) return "ogcd";
   // Fallback: names with "Enchanted" or known GCD patterns
-  if (/enchanted|verstone|verfire|verholy|verflare|scorch|resolution|jolt|impact/i.test(name)) return "gcd";
+  if (/enchanted|verstone|verfire|verholy|verflare|veraero|verthunder|scorch|resolution|jolt|impact|vercure/i.test(name)) return "gcd";
   return "ogcd";
 }
 
